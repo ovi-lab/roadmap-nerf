@@ -1,0 +1,55 @@
+ARG CUDA_VERSION=11.8.0
+ARG OS_VERSION=22.04
+ARG USER_ID=1000
+# Define base image.
+FROM nerfstudio-base
+ARG CUDA_VERSION
+ARG OS_VERSION
+ARG USER_ID
+
+# metainformation
+LABEL org.opencontainers.image.version = "0.1.18"
+LABEL org.opencontainers.image.source = "https://github.com/nerfstudio-project/nerfstudio"
+LABEL org.opencontainers.image.licenses = "Apache License 2.0"
+LABEL org.opencontainers.image.base.name="docker.io/library/nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${OS_VERSION}"
+
+# Variables used at build time.
+## CUDA architectures, required by Colmap and tiny-cuda-nn.
+## NOTE: All commonly used GPU architectures are included and supported here. To speedup the image build process remove all architectures but the one of your explicit GPU. Find details here: https://developer.nvidia.com/cuda-gpus (8.6 translates to 86 in the line below) or in the docs.
+ARG CUDA_ARCHITECTURES=86
+
+# Set environment variables.
+## Set non-interactive to prevent asking for user inputs blocking image creation.
+ENV DEBIAN_FRONTEND=noninteractive
+## Set timezone as it is required by some packages.
+ENV TZ=Europe/Berlin
+## CUDA Home, required to find CUDA in some packages.
+ENV CUDA_HOME="/usr/local/cuda"
+
+# Install pixel perfect sfm.
+RUN git clone --branch v1.0 --recursive https://github.com/cvg/pixel-perfect-sfm.git && \
+    cd pixel-perfect-sfm && \
+    sed -i "s/'-j'/'-j', '1'/g" setup.py && \
+    python3.10 -m pip install -e . && \
+    cd ..
+
+RUN python3.10 -m pip install omegaconf
+# Copy nerfstudio folder and give ownership to user.
+ADD . /home/user/nerfstudio
+USER root
+RUN chown -R user /home/user/nerfstudio
+USER ${USER_ID}
+
+# Install nerfstudio dependencies.
+RUN cd nerfstudio && \
+    python3.10 -m pip install -e . && \
+    cd ..
+
+# Change working directory
+WORKDIR /workspace
+
+# Install nerfstudio cli auto completion
+# RUN ns-install-cli --mode install
+
+# Bash as default entrypoint.
+CMD /bin/bash -l
