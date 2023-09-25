@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "roadmap-nerf"
+version = "0.1.0"
+description = ""
+authors = ["Shariff Faleel <shariff.mfa@outlook.com>"]
+readme = "README.md"
+packages = [{include = "roadmap_nerf"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+camera-calibration-suite = {git = "https://github.com/hcilab-uofm/camera_calibration_suit"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

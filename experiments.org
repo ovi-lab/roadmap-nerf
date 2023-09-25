@@ -1,0 +1,48 @@
+* exp3
+- Using images from outside the lab, with just images taken from the camera
+  #+begin_src sh
+    ns-process-data images --data lab_outside_v2_images --output-dir lab_outside_v2_out
+  #+end_src
+
+  #+begin_src sh
+    ns-train nerfacto --experiment-name exp3 --data lab_outside_v2_out/ --pipeline.model.predict-normals True
+  #+end_src
+
+  - export mesh
+  #+begin_src sh
+    ns-export poisson --load-config outputs/exp3/nerfacto/2023-09-22_192736/config.yml --output-dir exports/mesh/lab_outside_v2/ --target-num-faces 50000 --num-pixels-per-side 2048 --normal-method model_output --normal-output-name normals --num-points 1000000 --remove-outliers True --use-bounding-box True --bounding-box-min -3.5 -3.5 -1 --bounding-box-max 3.5 3.5 1
+  #+end_src
+
+  - export point cloud
+    #+begin_src sh
+      ns-export pointcloud --load-config outputs/exp3/nerfacto/2023-09-22_192736/config.yml --output-dir exports/pcd/lab_outside_v2/ --num-points 1000000 --remove-outliers True --normal-method model_output --normal-output-name normals --use-bounding-box True --bounding-box-min -3.5 -3.5 -1 --bounding-box-max 3.5 3.5 1
+    #+end_src
+
+* exp 4
+- Same as [[* exp3]], but with the larger model
+  #+begin_src sh
+    ns-train nerfacto-big --experiment-name exp4 --data lab_outside_v2_out/ --pipeline.model.predict-normals True
+  #+end_src
+
+- Doesn't work - insufficient memory
+
+* exp 5
+- Getting images of lab (v3) taken a bit more dense and also using the dslr app
+  #+begin_src sh
+    data/experiments/exp5_process_train.sh
+  #+end_src
+
+- View results
+  #+begin_src sh
+    ns-viewer --load-config outputs/exp4/nerfacto/2023-09-22_233637/config.yml
+  #+end_src
+
+- Export mesh
+  #+begin_src sh
+    ns-export poisson --load-config outputs/exp4/nerfacto/2023-09-22_233637/config.yml --output-dir exports/mesh/exp5 --target-num-faces 50000 --num-pixels-per-side 2048 --normal-method model_output --normal-output-name normals --num-points 1000000 --remove-outliers True --use-bounding-box True --bounding-box-min -1 -1 -1 --bounding-box-max 1 1 1
+  #+end_src
+
+- point cloud
+#+begin_src sh
+  ns-export pointcloud --load-config outputs/exp4/nerfacto/2023-09-22_233637/config.yml --output-dir exports/pcd/exp5 --num-points 1000000 --remove-outliers True --normal-method model_output --normal-output-name normals --use-bounding-box True --bounding-box-min -1 -1 -1 --bounding-box-max 1 1 1
+#+end_src
